@@ -329,6 +329,7 @@ class CycleGAN():
         self.model_setup()
         saver = tf.train.Saver()
         init = tf.global_variables_initializer()
+        sess.run(tf.local_variables_initializer())
 
         with tf.Session() as sess:
 
@@ -355,6 +356,7 @@ def main():
     model = CycleGAN()
     if to_train:
         model.train()
+        model.test()
     elif to_test:
         model.test()
 
