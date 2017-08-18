@@ -53,9 +53,9 @@ class CycleGAN():
         self.image_A/self.image_B -> Input image with each values ranging from [-1,1]
         '''
 
-        filenames_A = tf.train.match_filenames_once("/Users/devmcdevlin/.keras/datasets/dg-goma-2/images/*.png")    
+        filenames_A = tf.train.match_filenames_once("/home/ec2-user/.keras/datasets/dg-goma-2/images/*.png")    
         self.queue_length_A = tf.constant([1273]) #tf.size(filenames_A)
-        filenames_B = tf.train.match_filenames_once("/Users/devmcdevlin/.keras/datasets/dg-goma-2/labels/color/*.png")    
+        filenames_B = tf.train.match_filenames_once("/home/ec2-user/.keras/datasets/dg-goma-2/labels/color/*.png")    
         self.queue_length_B = tf.constant([1472]) #tf.size(filenames_B)
         
         filename_queue_A = tf.train.string_input_producer(filenames_A)
