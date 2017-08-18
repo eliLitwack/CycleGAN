@@ -53,10 +53,10 @@ class CycleGAN():
         self.image_A/self.image_B -> Input image with each values ranging from [-1,1]
         '''
 
-        filenames_A = tf.train.match_filenames_once("./input/horse2zebra/trainA/*.jpg")    
-        self.queue_length_A = tf.size(filenames_A)
-        filenames_B = tf.train.match_filenames_once("./input/horse2zebra/trainB/*.jpg")    
-        self.queue_length_B = tf.size(filenames_B)
+        filenames_A = tf.train.match_filenames_once("/Users/devmcdevlin/.keras/datasets/dg-goma-2/images/*.png")    
+        self.queue_length_A = tf.constant([1273]) #tf.size(filenames_A)
+        filenames_B = tf.train.match_filenames_once("/Users/devmcdevlin/.keras/datasets/dg-goma-2/labels/color/*.png")    
+        self.queue_length_B = tf.constant([1472]) #tf.size(filenames_B)
         
         filename_queue_A = tf.train.string_input_producer(filenames_A)
         filename_queue_B = tf.train.string_input_producer(filenames_B)
@@ -65,8 +65,8 @@ class CycleGAN():
         _, image_file_A = image_reader.read(filename_queue_A)
         _, image_file_B = image_reader.read(filename_queue_B)
 
-        self.image_A = tf.subtract(tf.div(tf.image.resize_images(tf.image.decode_jpeg(image_file_A),[256,256]),127.5),1)
-        self.image_B = tf.subtract(tf.div(tf.image.resize_images(tf.image.decode_jpeg(image_file_B),[256,256]),127.5),1)
+        self.image_A = tf.subtract(tf.div(tf.image.resize_images(tf.image.decode_png(image_file_A),[256,256]),127.5),1)
+        self.image_B = tf.subtract(tf.div(tf.image.resize_images(tf.image.decode_png(image_file_B),[256,256]),127.5),1)
 
     
 
@@ -96,12 +96,12 @@ class CycleGAN():
 
         for i in range(max_images): 
             image_tensor = sess.run(self.image_A)
-            if(image_tensor.size() == img_size*batch_size*img_layer):
+            if(image_tensor.size == img_size*batch_size*img_layer):
                 self.A_input[i] = image_tensor.reshape((batch_size,img_height, img_width, img_layer))
 
         for i in range(max_images):
             image_tensor = sess.run(self.image_B)
-            if(image_tensor.size() == img_size*batch_size*img_layer):
+            if(image_tensor.size == img_size*batch_size*img_layer):
                 self.B_input[i] = image_tensor.reshape((batch_size,img_height, img_width, img_layer))
 
 
@@ -202,12 +202,12 @@ class CycleGAN():
 
         for i in range(0,10):
             fake_A_temp, fake_B_temp, cyc_A_temp, cyc_B_temp = sess.run([self.fake_A, self.fake_B, self.cyc_A, self.cyc_B],feed_dict={self.input_A:self.A_input[i], self.input_B:self.B_input[i]})
-            imsave("./output/imgs/fakeB_"+ str(epoch) + "_" + str(i)+".jpg",((fake_A_temp[0]+1)*127.5).astype(np.uint8))
-            imsave("./output/imgs/fakeA_"+ str(epoch) + "_" + str(i)+".jpg",((fake_B_temp[0]+1)*127.5).astype(np.uint8))
-            imsave("./output/imgs/cycA_"+ str(epoch) + "_" + str(i)+".jpg",((cyc_A_temp[0]+1)*127.5).astype(np.uint8))
-            imsave("./output/imgs/cycB_"+ str(epoch) + "_" + str(i)+".jpg",((cyc_B_temp[0]+1)*127.5).astype(np.uint8))
-            imsave("./output/imgs/inputA_"+ str(epoch) + "_" + str(i)+".jpg",((self.A_input[i][0]+1)*127.5).astype(np.uint8))
-            imsave("./output/imgs/inputB_"+ str(epoch) + "_" + str(i)+".jpg",((self.B_input[i][0]+1)*127.5).astype(np.uint8))
+            imsave("./output/imgs/fakeB_"+ str(epoch) + "_" + str(i)+".png",((fake_A_temp[0]+1)*127.5).astype(np.uint8))
+            imsave("./output/imgs/fakeA_"+ str(epoch) + "_" + str(i)+".png",((fake_B_temp[0]+1)*127.5).astype(np.uint8))
+            imsave("./output/imgs/cycA_"+ str(epoch) + "_" + str(i)+".png",((cyc_A_temp[0]+1)*127.5).astype(np.uint8))
+            imsave("./output/imgs/cycB_"+ str(epoch) + "_" + str(i)+".png",((cyc_B_temp[0]+1)*127.5).astype(np.uint8))
+            imsave("./output/imgs/inputA_"+ str(epoch) + "_" + str(i)+".png",((self.A_input[i][0]+1)*127.5).astype(np.uint8))
+            imsave("./output/imgs/inputB_"+ str(epoch) + "_" + str(i)+".png",((self.B_input[i][0]+1)*127.5).astype(np.uint8))
 
     def fake_image_pool(self, num_fakes, fake, fake_pool):
         ''' This function saves the generated image to corresponding pool of images.
@@ -249,6 +249,7 @@ class CycleGAN():
 
         with tf.Session() as sess:
             sess.run(init)
+            sess.run(tf.local_variables_initializer())
 
             #Read input to nd array
             self.input_read(sess)
@@ -343,10 +344,10 @@ class CycleGAN():
 
             for i in range(0,100):
                 fake_A_temp, fake_B_temp = sess.run([self.fake_A, self.fake_B],feed_dict={self.input_A:self.A_input[i], self.input_B:self.B_input[i]})
-                imsave("./output/imgs/test/fakeB_"+str(i)+".jpg",((fake_A_temp[0]+1)*127.5).astype(np.uint8))
-                imsave("./output/imgs/test/fakeA_"+str(i)+".jpg",((fake_B_temp[0]+1)*127.5).astype(np.uint8))
-                imsave("./output/imgs/test/inputA_"+str(i)+".jpg",((self.A_input[i][0]+1)*127.5).astype(np.uint8))
-                imsave("./output/imgs/test/inputB_"+str(i)+".jpg",((self.B_input[i][0]+1)*127.5).astype(np.uint8))
+                imsave("./output/imgs/test/fakeB_"+str(i)+".png",((fake_A_temp[0]+1)*127.5).astype(np.uint8))
+                imsave("./output/imgs/test/fakeA_"+str(i)+".png",((fake_B_temp[0]+1)*127.5).astype(np.uint8))
+                imsave("./output/imgs/test/inputA_"+str(i)+".png",((self.A_input[i][0]+1)*127.5).astype(np.uint8))
+                imsave("./output/imgs/test/inputB_"+str(i)+".png",((self.B_input[i][0]+1)*127.5).astype(np.uint8))
 
 
 def main():
